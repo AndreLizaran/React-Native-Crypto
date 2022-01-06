@@ -1,6 +1,7 @@
 // Modules
 import React, { useContext, useEffect } from 'react';
 import { View, Text, Image, ScrollView } from 'react-native';
+import { AntDesign } from '@expo/vector-icons';
 
 // Types
 import { CoinType } from '../requests/generalRequests';
@@ -10,17 +11,25 @@ import { GeneralContext } from '../states/GeneralState';
 
 export default function Home() {
   //
-  const { getCoins, coins } = useContext(GeneralContext);
+  const { getCoins, coins, loadingIcons } = useContext(GeneralContext);
 
   useEffect(() => {
     getCoins();
   }, []);
 
-  return (
-    <View style={{ flex: 1, padding: 20, paddingBottom: 0 }}>
-      <CoinsContainer coins={coins} />
-    </View>
-  );
+  if (!loadingIcons) {
+    return (
+      <View style={{ flex: 1, padding: 20, paddingBottom: 0 }}>
+        <CoinsContainer coins={coins} />
+      </View>
+    );
+  } else {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <AntDesign name='loading1' size={24} color='white' />
+      </View>
+    );
+  }
 }
 
 type CoinsContainerProps = {

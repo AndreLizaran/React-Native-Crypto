@@ -9,6 +9,7 @@ type initialStateType = {
   token: string;
   coins: CoinType[];
   favoriteCoins: string[];
+  loadingIcons: boolean;
 };
 
 const initialState: initialStateType = {
@@ -16,6 +17,7 @@ const initialState: initialStateType = {
   token: '',
   coins: [],
   favoriteCoins: [],
+  loadingIcons: true,
 };
 
 export const GeneralContext = createContext({
@@ -32,8 +34,14 @@ function GeneralState({ children }: GeneralStateProps) {
   const [generalState, setGeneralState] = useState(initialState);
 
   async function getCoins() {
-    const { data } = await getCoinsRequest();
-    setGeneralState({ ...generalState, coins: data });
+    try {
+      setGeneralState({ ...generalState, loadingIcons: true });
+      const { data } = await getCoinsRequest();
+      setGeneralState({ ...generalState, coins: data });
+      setGeneralState({ ...generalState, loadingIcons: false });
+    } catch {
+      setGeneralState({ ...generalState, loadingIcons: false });
+    }
   }
 
   return (
