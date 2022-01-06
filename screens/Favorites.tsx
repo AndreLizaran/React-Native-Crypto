@@ -4,12 +4,12 @@ import { GeneralContext } from '../states/GeneralState';
 
 export default function Favorites() {
   //
-  const { username } = useContext(GeneralContext);
+  const { uid } = useContext(GeneralContext);
 
-  if (!username) {
+  if (!uid) {
     return <NoUser />;
   } else {
-    return <></>;
+    return <FavoritesList />;
   }
 }
 
@@ -31,4 +31,9 @@ function NoUser() {
       </View>
     </View>
   );
+}
+
+function FavoritesList() {
+  const { favoriteCoins } = useContext(GeneralContext);
+  return <View></View>;
 }

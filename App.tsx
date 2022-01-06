@@ -1,11 +1,11 @@
 // Modules
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { AntDesign } from '@expo/vector-icons';
+import { LogBox } from 'react-native';
 
 // Colors
-import { backgroundColor, lightGray } from './utils/colors';
+import { backgroundColor } from './utils/colors';
 
 // Screens
 import Home from './screens/Home';
@@ -15,8 +15,9 @@ import GeneralState from './states/GeneralState';
 import Favorites from './screens/Favorites';
 import User from './screens/User';
 
+LogBox.ignoreAllLogs();
+
 const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
 
 const myTheme = {
   ...DefaultTheme,
@@ -43,6 +44,7 @@ function App() {
               if (route.name === 'Home') iconName = 'home';
               else if (route.name === 'Favorites') iconName = 'star';
               else iconName = 'user';
+              // @ts-ignore
               return <AntDesign name={iconName} size={24} color={color} />;
             },
             tabBarActiveTintColor: 'white',
