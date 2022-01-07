@@ -1,6 +1,13 @@
 // Modules
 import React, { useContext } from 'react';
-import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 
 // Types
@@ -32,7 +39,7 @@ type CoinsContainerProps = {
   coins: CoinType[];
 };
 
-function CoinsContainer({ coins }: CoinsContainerProps) {
+export function CoinsContainer({ coins }: CoinsContainerProps) {
   return (
     <View>
       <ScrollView>
@@ -48,20 +55,24 @@ type CoinRowProps = {
   coin: CoinType;
 };
 
-function CoinRow({
-  coin: { name, image, current_price, price_change_24h, id },
-}: CoinRowProps) {
+function CoinRow({ coin }: CoinRowProps) {
   //
-  const { addFavoriteCoin, removeFromFavorites, favoriteCoins } =
+  const { name, image, current_price, price_change_24h, id } = coin;
+  const { addFavoriteCoin, removeFromFavorites, favoriteCoins, uid } =
     useContext(GeneralContext);
 
   return (
     <TouchableOpacity
-      onPress={() =>
-        favoriteCoins.includes(id)
-          ? removeFromFavorites(id)
-          : addFavoriteCoin(id)
-      }
+      onPress={() => {
+        if (uid) {
+          let mapedFavoriteCoins = favoriteCoins.map((coin) => {
+            return coin.id;
+          });
+          mapedFavoriteCoins.includes(id)
+            ? removeFromFavorites(coin)
+            : addFavoriteCoin(coin);
+        } else Alert.alert('You need to sign in first');
+      }}
     >
       <View
         style={{
@@ -96,7 +107,9 @@ function CoinRow({
           </View>
         </View>
         <AntDesign
-          name={favoriteCoins.includes(id) ? 'star' : 'staro'}
+          name={
+            favoriteCoins.filter((e) => e.id === id).length ? 'star' : 'staro'
+          }
           size={24}
           color='white'
         />

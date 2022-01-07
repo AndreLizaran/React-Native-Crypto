@@ -230,7 +230,8 @@ function SignUpForm() {
 
 function UserForm() {
   //
-  const { signOutUser, uid, displayName } = useContext(GeneralContext);
+  const { signOutUser, displayName, favoriteCoins } =
+    useContext(GeneralContext);
 
   return (
     <View style={{ padding: 20, flex: 1, alignItems: 'center' }}>
@@ -262,7 +263,7 @@ function UserForm() {
         {displayName}
       </Text>
       <Text style={{ color: 'white', fontSize: 16, marginBottom: 20 }}>
-        Saved coins: 0
+        Saved coins: {favoriteCoins.length}
       </Text>
       <TouchableOpacity
         style={{

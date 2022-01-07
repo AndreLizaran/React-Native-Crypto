@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { View, Text } from 'react-native';
 import { GeneralContext } from '../states/GeneralState';
+import { CoinsContainer } from './Home';
 
 export default function Favorites() {
   //
@@ -34,6 +35,12 @@ function NoUser() {
 }
 
 function FavoritesList() {
+  //
   const { favoriteCoins } = useContext(GeneralContext);
-  return <View></View>;
+
+  return (
+    <View style={{ flex: 1, padding: 20, paddingBottom: 0 }}>
+      <CoinsContainer coins={favoriteCoins} />
+    </View>
+  );
 }

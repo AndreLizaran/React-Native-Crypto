@@ -1,5 +1,6 @@
 // Modules
 import { createContext, ReactNode, useEffect, useState } from 'react';
+
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -8,21 +9,26 @@ import {
   onAuthStateChanged,
   signOut,
 } from 'firebase/auth';
+
 import {
   getFirestore,
   collection,
   getDocs,
-  setDoc,
   doc,
+  addDoc,
+  deleteDoc,
+  setDoc,
 } from 'firebase/firestore';
+
+// Firebase
+import app from '../utils/firebase';
 
 // Requests
 import { CoinType, getCoinsRequest } from '../requests/generalRequests';
-import app from '../utils/firebase';
 
 type initialStateType = {
   coins: CoinType[];
-  favoriteCoins: string[];
+  favoriteCoins: CoinType[];
   loadingCoins: boolean;
   loadingSignUp: boolean;
   loadingSignIn: boolean;
@@ -51,8 +57,8 @@ export const GeneralContext = createContext({
   signInUser: function (email: string, password: string) {},
   changeUserScreen: function (screen: 'sign-in' | 'sign-up' | 'user') {},
   signOutUser: function () {},
-  addFavoriteCoin: function (idCoin: string) {},
-  removeFromFavorites: function (idCoin: string) {},
+  addFavoriteCoin: function (idCoin: CoinType) {},
+  removeFromFavorites: function (idCoin: CoinType) {},
 });
 
 type GeneralStateProps = {
@@ -81,35 +87,6 @@ function GeneralState({ children }: GeneralStateProps) {
       }
     });
   }, []);
-
-  async function getCoins(user: string) {
-    try {
-      setGeneralState({ ...generalState, loadingCoins: true });
-      const { data } = await getCoinsRequest();
-      if (user) {
-        let coins: string[] = [];
-        const querySnapshot = await getDocs(collection(db, user));
-        querySnapshot.forEach((doc) => {
-          coins = doc.data().idCoins;
-        });
-        setGeneralState({
-          ...generalState,
-          coins: data,
-          loadingCoins: false,
-          favoriteCoins: coins,
-          userScreen: 'user',
-        });
-      } else {
-        setGeneralState({
-          ...generalState,
-          coins: data,
-          loadingCoins: false,
-        });
-      }
-    } catch {
-      setGeneralState({ ...generalState, loadingCoins: false });
-    }
-  }
 
   async function createUser(username: string, email: string, password: string) {
     try {
@@ -166,29 +143,63 @@ function GeneralState({ children }: GeneralStateProps) {
     setGeneralState({ ...generalState, userScreen: screen });
   }
 
-  async function addFavoriteCoin(idCoin: string) {
+  async function getCoins(user: string) {
     try {
-      let newFavoriteCoins = [...generalState.favoriteCoins, idCoin];
-      await setDoc(doc(db, userState.uid, 'favorite-coins'), {
-        idCoins: newFavoriteCoins,
+      setGeneralState({ ...generalState, loadingCoins: true });
+      const { data } = await getCoinsRequest();
+      if (user) {
+        let favoriteCoins: CoinType[] = [];
+        const querySnapshot = await getDocs(collection(db, user));
+        querySnapshot.forEach((doc) => {
+          // @ts-ignore
+          favoriteCoins.push(doc.data());
+        });
+        setGeneralState({
+          ...generalState,
+          coins: data,
+          loadingCoins: false,
+          favoriteCoins,
+          userScreen: 'user',
+        });
+      } else {
+        setGeneralState({
+          ...generalState,
+          coins: data,
+          loadingCoins: false,
+          favoriteCoins: [],
+          userScreen: 'sign-in',
+        });
+      }
+    } catch {
+      setGeneralState({ ...generalState, loadingCoins: false });
+    }
+  }
+
+  async function addFavoriteCoin(coin: CoinType) {
+    try {
+      const newFavoriteCoins = [...generalState.favoriteCoins, coin];
+      await setDoc(doc(db, userState.uid, coin.id), {
+        name: coin.name,
+        id: coin.id,
+        current_price: coin.current_price,
+        image: coin.image,
+        price_change_24h: coin.price_change_24h,
       });
       setGeneralState({
         ...generalState,
-        favoriteCoins: [...generalState.favoriteCoins, idCoin],
+        favoriteCoins: newFavoriteCoins,
       });
     } catch (error: any) {
       console.log(error);
     }
   }
 
-  async function removeFromFavorites(idCoin: string) {
+  async function removeFromFavorites(newCoin: CoinType) {
     try {
       let newFavoriteCoins = generalState.favoriteCoins.filter((coin) => {
-        if (coin !== idCoin) return coin;
+        if (coin.id !== newCoin.id) return coin;
       });
-      await setDoc(doc(db, userState.uid, 'favorite-coins'), {
-        idCoins: newFavoriteCoins,
-      });
+      await deleteDoc(doc(db, userState.uid, newCoin.id));
       setGeneralState({ ...generalState, favoriteCoins: newFavoriteCoins });
     } catch (error: any) {
       console.log(error);
